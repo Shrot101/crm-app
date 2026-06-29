@@ -298,7 +298,7 @@ fun CountryCodeDropdown(
             value = "${selectedOption.first} ${selectedOption.second}",
             onValueChange = {},
             readOnly = true,
-            modifier = Modifier.menuAnchor(),
+            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
             shape = RoundedCornerShape(12.dp),
             textStyle = MaterialTheme.typography.bodyMedium,
             colors = OutlinedTextFieldDefaults.colors(
@@ -352,7 +352,7 @@ fun LeadDropdownField(
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             },
             modifier = Modifier
-                .menuAnchor()
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 .fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(

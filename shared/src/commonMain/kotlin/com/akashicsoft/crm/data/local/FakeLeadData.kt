@@ -1,6 +1,7 @@
 package com.akashicsoft.crm.data.local
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -220,10 +221,10 @@ object LeadListUIHelpers {
             "QUALIFIED" -> Icons.Default.CheckCircle
             "CONTACTED" -> Icons.Default.Phone
             "PROPOSAL_SENT" -> Icons.Default.Description
-            "NEGOTIATION" -> Icons.Default.ArrowForward
+            "NEGOTIATION" -> Icons.AutoMirrored.Filled.ArrowForward
             "WON" -> Icons.Default.Star
             "LOST" -> Icons.Default.ThumbDown
-            else -> Icons.Default.Help
+            else -> Icons.AutoMirrored.Filled.Help
         }
     }
 }

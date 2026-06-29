@@ -21,13 +21,17 @@ enum class Screen {
     LEAD_LIST,
     DEAL_LIST,
     CONTACT_LIST,
+    ORG_LIST,
     CREATE_LEAD,
     CREATE_DEAL,
     CREATE_CONTACT,
+    CREATE_ORG,
     EDIT_LEAD,
     EDIT_DEAL,
+    EDIT_ORG,
     LEAD_DETAILS,
     CONTACT_DETAILS,
+    ORG_DETAILS,
     EDIT_CONTACT,
     LEAD_FILTER,
     DEAL_FILTER,
@@ -42,19 +46,24 @@ fun App() {
     var selectedLeadId by remember { mutableStateOf<String?>(null) }
     var selectedDealId by remember { mutableStateOf<String?>(null) }
     var selectedContactId by remember { mutableStateOf<String?>(null) }
+    var selectedOrgId by remember { mutableStateOf<String?>(null) }
     
     // ViewModels
     val leadViewModel = remember { LeadViewModel() }
     val dealViewModel = remember { DealViewModel() }
     val contactViewModel = remember { ContactViewModel() }
+    val orgViewModel = remember { OrgViewModel() }
     val createLeadViewModel    = remember { CreateLeadViewModel() }
     val createDealViewModel    = remember { CreateDealViewModel() }
     val createContactViewModel = remember { CreateContactViewModel() }
+    val createOrgViewModel     = remember { CreateOrgViewModel() }
     val leadDetailsViewModel = remember { LeadDetailsViewModel() }
     val editLeadViewModel = remember { EditLeadViewModel() }
     val editDealViewModel = remember { EditDealViewModel() }
     val editContactViewModel = remember { EditContactViewModel() }
+    val editOrgViewModel = remember { EditOrgViewModel() }
     val contactDetailViewModel = remember { ContactDetailViewModel() }
+    val orgDetailViewModel = remember { OrgDetailViewModel() }
 
     val activeDealFilters by dealViewModel.activeFilterCount.collectAsState()
     val activeContactFilters by contactViewModel.activeFilterCount.collectAsState()
@@ -68,19 +77,24 @@ fun App() {
                     currentScreen != Screen.CONTACT_FILTER && 
                     currentScreen != Screen.LEAD_DETAILS &&
                     currentScreen != Screen.CONTACT_DETAILS &&
-                    currentScreen != Screen.EDIT_CONTACT
+                    currentScreen != Screen.ORG_DETAILS &&
+                    currentScreen != Screen.EDIT_CONTACT &&
+                    currentScreen != Screen.EDIT_ORG
                 ) {
                     CrmTopAppBar(
                         title = when(currentScreen) {
                             Screen.LEAD_LIST     -> "Leads"
                             Screen.DEAL_LIST     -> "Deals"
                             Screen.CONTACT_LIST  -> "Contacts"
+                            Screen.ORG_LIST      -> "Organizations"
                             Screen.CREATE_LEAD   -> "Create Lead"
                             Screen.CREATE_DEAL   -> "Create Deal"
                             Screen.CREATE_CONTACT -> "Create Contact"
+                            Screen.CREATE_ORG    -> "Create Organization"
                             Screen.EDIT_LEAD     -> "Edit Lead"
                             Screen.EDIT_DEAL     -> "Edit Deal"
                             Screen.EDIT_CONTACT  -> "Edit Contact"
+                            Screen.EDIT_ORG      -> "Edit Organization"
                             else -> "CRM"
                         },
                         isSubScreen = currentScreen == Screen.CREATE_LEAD   ||
@@ -88,7 +102,9 @@ fun App() {
                                      currentScreen == Screen.CREATE_DEAL    ||
                                      currentScreen == Screen.EDIT_DEAL      ||
                                      currentScreen == Screen.CREATE_CONTACT ||
-                                     currentScreen == Screen.EDIT_CONTACT,
+                                     currentScreen == Screen.CREATE_ORG     ||
+                                     currentScreen == Screen.EDIT_CONTACT   ||
+                                     currentScreen == Screen.EDIT_ORG,
                         hasActiveFilters = when(currentScreen) {
                             Screen.DEAL_LIST -> activeDealFilters > 0
                             Screen.CONTACT_LIST -> activeContactFilters > 0
@@ -105,6 +121,7 @@ fun App() {
                                 Screen.CREATE_DEAL    -> currentScreen = Screen.DEAL_LIST
                                 Screen.EDIT_DEAL      -> currentScreen = Screen.DEAL_LIST
                                 Screen.CREATE_CONTACT -> currentScreen = Screen.CONTACT_LIST
+                                Screen.CREATE_ORG     -> currentScreen = Screen.ORG_LIST
                                 else -> currentScreen = if (currentScreen == Screen.LEAD_LIST)
                                     Screen.DEAL_LIST else Screen.LEAD_LIST
                             }
@@ -125,7 +142,8 @@ fun App() {
             bottomBar = {
                 if (currentScreen == Screen.LEAD_LIST || 
                     currentScreen == Screen.DEAL_LIST || 
-                    currentScreen == Screen.CONTACT_LIST) {
+                    currentScreen == Screen.CONTACT_LIST ||
+                    currentScreen == Screen.ORG_LIST) {
                     NavigationBar(
                         containerColor = Color.White,
                         tonalElevation = 8.dp
@@ -152,10 +170,11 @@ fun App() {
                             colors = NavigationBarItemDefaults.colors(selectedIconColor = Color(0xFF6E40FF), selectedTextColor = Color(0xFF6E40FF))
                         )
                         NavigationBarItem(
-                            selected = false,
-                            onClick = { /* More */ },
+                            selected = currentScreen == Screen.ORG_LIST,
+                            onClick = { currentScreen = Screen.ORG_LIST },
                             icon = { Icon(Icons.Default.Menu, "More") },
-                            label = { Text("More") }
+                            label = { Text("More") },
+                            colors = NavigationBarItemDefaults.colors(selectedIconColor = Color(0xFF6E40FF), selectedTextColor = Color(0xFF6E40FF))
                         )
                     }
                 }
@@ -209,6 +228,24 @@ fun App() {
                         }
                     )
                 }
+                Screen.ORG_LIST -> {
+                    OrgScreen(
+                        viewModel = orgViewModel,
+                        modifier = Modifier.padding(innerPadding),
+                        onAddOrgClick = {
+                            createOrgViewModel.resetForm()
+                            currentScreen = Screen.CREATE_ORG
+                        },
+                        onOrgSelected = { orgId ->
+                            selectedOrgId = orgId
+                            currentScreen = Screen.ORG_DETAILS
+                        },
+                        onEditOrg = { orgId ->
+                            selectedOrgId = orgId
+                            currentScreen = Screen.EDIT_ORG
+                        }
+                    )
+                }
                 Screen.CREATE_LEAD -> {
                     CreateLeadScreen(
                         viewModel = createLeadViewModel,
@@ -228,6 +265,13 @@ fun App() {
                         viewModel      = createContactViewModel,
                         modifier       = Modifier.padding(innerPadding),
                         onNavigateBack = { currentScreen = Screen.CONTACT_LIST }
+                    )
+                }
+                Screen.CREATE_ORG -> {
+                    CreateOrgScreen(
+                        viewModel      = createOrgViewModel,
+                        modifier       = Modifier.padding(innerPadding),
+                        onNavigateBack = { currentScreen = Screen.ORG_LIST }
                     )
                 }
                 Screen.EDIT_LEAD -> {
@@ -300,6 +344,28 @@ fun App() {
                             viewModel = editContactViewModel,
                             contactId = id,
                             onNavigateBack = { currentScreen = Screen.CONTACT_DETAILS }
+                        )
+                    }
+                }
+                Screen.ORG_DETAILS -> {
+                    selectedOrgId?.let { id ->
+                        OrgDetailScreen(
+                            viewModel = orgDetailViewModel,
+                            orgId = id,
+                            onNavigateBack = { currentScreen = Screen.ORG_LIST },
+                            onEditOrg = { orgId ->
+                                selectedOrgId = orgId
+                                currentScreen = Screen.EDIT_ORG
+                            }
+                        )
+                    }
+                }
+                Screen.EDIT_ORG -> {
+                    selectedOrgId?.let { id ->
+                        EditOrgScreen(
+                            viewModel = editOrgViewModel,
+                            orgId = id,
+                            onNavigateBack = { currentScreen = Screen.ORG_LIST }
                         )
                     }
                 }

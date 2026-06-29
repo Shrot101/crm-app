@@ -339,7 +339,7 @@ private fun ContactDropdownField(
             label         = { Text(label) },
             leadingIcon   = leadingIcon,
             trailingIcon  = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier      = Modifier.menuAnchor().fillMaxWidth(),
+            modifier      = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
             shape         = RoundedCornerShape(12.dp),
             colors        = OutlinedTextFieldDefaults.colors(
                 focusedTextColor   = if (isAccent) accentColor else Color.Unspecified,
@@ -382,7 +382,7 @@ private fun ContactCountryCodeDropdown(
             value         = "${selectedOption.first} ${selectedOption.second}",
             onValueChange = {},
             readOnly      = true,
-            modifier      = Modifier.menuAnchor(),
+            modifier      = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
             shape         = RoundedCornerShape(12.dp),
             textStyle     = MaterialTheme.typography.bodyMedium,
             colors        = OutlinedTextFieldDefaults.colors(

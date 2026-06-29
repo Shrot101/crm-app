@@ -285,7 +285,7 @@ fun CurrencyDropdown(
             value = "${selectedOption.first} ${selectedOption.second}",
             onValueChange = {},
             readOnly = true,
-            modifier = Modifier.menuAnchor(),
+            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
             shape = RoundedCornerShape(12.dp),
             textStyle = MaterialTheme.typography.bodyMedium,
             colors = OutlinedTextFieldDefaults.colors(

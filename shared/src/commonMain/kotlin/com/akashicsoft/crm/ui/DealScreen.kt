@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -129,10 +130,10 @@ private fun DealHeader(viewModel: DealViewModel) {
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                PaginationIconButton(onClick = {}, enabled = false, icon = Icons.Default.ArrowBack)
-                PaginationIconButton(onClick = {}, enabled = false, icon = Icons.Default.KeyboardArrowLeft)
-                PaginationIconButton(onClick = {}, enabled = false, icon = Icons.Default.KeyboardArrowRight)
-                PaginationIconButton(onClick = {}, enabled = false, icon = Icons.Default.ArrowForward)
+                PaginationIconButton(onClick = {}, enabled = false, icon = Icons.AutoMirrored.Filled.ArrowBack)
+                PaginationIconButton(onClick = {}, enabled = false, icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft)
+                PaginationIconButton(onClick = {}, enabled = false, icon = Icons.AutoMirrored.Filled.KeyboardArrowRight)
+                PaginationIconButton(onClick = {}, enabled = false, icon = Icons.AutoMirrored.Filled.ArrowForward)
             }
         }
     }
@@ -222,7 +223,7 @@ fun DealCard(
                 }
             }
 
-            Divider(modifier = Modifier.padding(vertical = 12.dp), color = Color(0xFFF0F0F0))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color(0xFFF0F0F0))
 
             // Row 3: Owner and Close Date
             Row(
@@ -263,7 +264,7 @@ fun DealCard(
             // Expanded Content
             AnimatedVisibility(visible = isExpanded) {
                 Column(modifier = Modifier.padding(top = 16.dp)) {
-                    Divider(color = Color(0xFFF0F0F0), modifier = Modifier.padding(bottom = 16.dp))
+                    HorizontalDivider(color = Color(0xFFF0F0F0), modifier = Modifier.padding(bottom = 16.dp))
                     
                     // Product and Rating
                     Row(

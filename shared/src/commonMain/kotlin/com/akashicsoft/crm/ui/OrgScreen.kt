@@ -7,7 +7,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,25 +19,23 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.akashicsoft.crm.data.local.LeadListUIHelpers
-import com.akashicsoft.crm.model.LeadListItem
+import com.akashicsoft.crm.model.Organization
 import com.akashicsoft.crm.ui.components.LeadListSkeleton
-import com.akashicsoft.crm.viewModel.LeadViewModel
+import com.akashicsoft.crm.viewModel.OrgViewModel
 
 @Composable
-fun LeadScreen(
-    viewModel: LeadViewModel,
+fun OrgScreen(
+    viewModel: OrgViewModel,
     modifier: Modifier = Modifier,
-    onAddLeadClick: () -> Unit = {},
-    onLeadSelected: (String) -> Unit = {},
-    onEditLead: (String) -> Unit = {},
-    canEditLead: Boolean = true
+    onAddOrgClick: () -> Unit = {},
+    onOrgSelected: (String) -> Unit = {},
+    onEditOrg: (String) -> Unit = {},
+    canEditOrg: Boolean = true
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    // Load only once when the screen enters the composition
     LaunchedEffect(Unit) {
-        viewModel.loadLeads()
+        viewModel.loadOrganizations()
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -46,40 +45,36 @@ fun LeadScreen(
                 .background(Color.White)
         ) {
             // Header
-            LeadHeader(
-                viewModel = viewModel
-            )
+            OrgHeader(viewModel = viewModel)
 
             // Content
             if (state.isLoading) {
                 LeadListSkeleton(modifier = Modifier.weight(1f))
-            } else if (state.leads.isEmpty()) {
-                EmptyLeadsView()
+            } else if (state.organizations.isEmpty()) {
+                EmptyOrgView()
             } else {
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(16.dp, 8.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Use a key for better performance in LazyColumn
                     items(
-                        items = state.leads,
+                        items = state.organizations,
                         key = { it._id }
-                    ) { lead ->
-                        LeadCard(
-                            lead = lead,
-                            onClick = { onLeadSelected(lead._id) },
-                            onEdit = { onEditLead(lead._id) },
-                            canEdit = canEditLead
+                    ) { org ->
+                        OrgCard(
+                            org = org,
+                            onClick = { onOrgSelected(org._id) },
+                            onEdit = { onEditOrg(org._id) },
+                            canEdit = canEditOrg
                         )
                     }
                 }
             }
         }
 
-        // Floating Action Button specific to LeadScreen
         FloatingActionButton(
-            onClick = onAddLeadClick,
+            onClick = onAddOrgClick,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
@@ -89,21 +84,21 @@ fun LeadScreen(
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Add Lead"
+                contentDescription = "Add Organization"
             )
         }
     }
 }
 
 @Composable
-private fun LeadHeader(
-    viewModel: LeadViewModel
+private fun OrgHeader(
+    viewModel: OrgViewModel
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White), // Bright white
+        colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -117,7 +112,7 @@ private fun LeadHeader(
             val (currentPage, totalPages, totalCount) = viewModel.getCurrentPageInfo()
             Column {
                 Text(
-                    text = "Total: $totalCount leads",
+                    text = "Total: $totalCount organizations",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Medium
@@ -143,13 +138,13 @@ private fun LeadHeader(
                     onClick = { viewModel.loadPreviousPage() },
                     enabled = viewModel.canNavigatePrevious(),
                     contentDescription = "Previous page",
-                    icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft
+                    icon = Icons.Default.KeyboardArrowLeft
                 )
                 PaginationIconButton(
                     onClick = { viewModel.loadNextPage() },
                     enabled = viewModel.canNavigateNext(),
                     contentDescription = "Next page",
-                    icon = Icons.AutoMirrored.Filled.KeyboardArrowRight
+                    icon = Icons.Default.KeyboardArrowRight
                 )
                 PaginationIconButton(
                     onClick = { viewModel.loadLastPage() },
@@ -163,8 +158,8 @@ private fun LeadHeader(
 }
 
 @Composable
-fun LeadCard(
-    lead: LeadListItem,
+fun OrgCard(
+    org: Organization,
     onClick: () -> Unit,
     onEdit: () -> Unit,
     canEdit: Boolean = true
@@ -173,7 +168,7 @@ fun LeadCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = Color.White), // Bright white
+        colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -184,7 +179,7 @@ fun LeadCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "#${lead.leadNumber ?: ""} • ${lead.getOwnerName()}",
+                    text = "#${org.orgNo} • ${org.industry}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium,
@@ -198,7 +193,7 @@ fun LeadCard(
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
-                        text = lead.createdAt?.take(10) ?: "Unknown",
+                        text = org.type,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -209,18 +204,72 @@ fun LeadCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = lead.getFullName(),
+                text = org.organizationName,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             
-            lead.organizationName?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
+            Text(
+                text = org.website,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.People,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "${org.numberOfEmployees} Emp.",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                Surface(
+                    color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AttachMoney,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = org.targetAmount.toString(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -230,57 +279,17 @@ fun LeadCard(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val statusColor = LeadListUIHelpers.getStatusColor(lead.status)
-                Surface(
-                    color = statusColor.copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = LeadListUIHelpers.getStatusIcon(lead.status),
-                            contentDescription = null,
-                            tint = statusColor,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = lead.status ?: "UNKNOWN",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = statusColor,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-
-                // Lead Phone instead of Value
-                val primaryPhone = lead.getPrimaryPhone()
-                if (primaryPhone != "No Phone") {
-                    Surface(
-                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(20.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Call,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = primaryPhone,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.secondary,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                    }
+                Text(
+                    text = "Source: ${org.leadSource}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+                if (org.associatedCompany.isNotBlank() && org.associatedCompany != "-") {
+                    Text(
+                        text = "• Associated: ${org.associatedCompany}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
                 }
             }
 
@@ -293,14 +302,14 @@ fun LeadCard(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        Icons.Default.Email,
+                        Icons.Default.LocationOn,
                         contentDescription = null,
                         modifier = Modifier.size(14.dp),
                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = lead.getPrimaryEmail(),
+                        text = "${org.city}, ${org.state}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
@@ -343,12 +352,12 @@ private fun PaginationIconButton(
 }
 
 @Composable
-fun EmptyLeadsView() {
+fun EmptyOrgView() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(Icons.Default.Face, contentDescription = null, modifier = Modifier.size(64.dp), tint = Color.Gray)
+            Icon(Icons.Default.Business, contentDescription = null, modifier = Modifier.size(64.dp), tint = Color.Gray)
             Spacer(modifier = Modifier.height(16.dp))
-            Text("No leads found", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+            Text("No matching records found", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
         }
     }
 }
