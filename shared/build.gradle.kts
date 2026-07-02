@@ -50,6 +50,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
             implementation("org.jetbrains.compose.material:material:1.11.1")
+            implementation(libs.kotlinxdatetime)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

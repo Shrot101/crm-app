@@ -11,8 +11,10 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import androidx.compose.ui.tooling.preview.Preview
 import com.akashicsoft.crm.ui.*
+import com.akashicsoft.crm.activity.ui.ActivityScreen
 import com.akashicsoft.crm.ui.components.CrmTopAppBar
 import com.akashicsoft.crm.viewModel.*
+import com.akashicsoft.crm.activity.viewmodel.ActivityViewModel
 
 /**
  * Available Screens in the App
@@ -35,13 +37,14 @@ enum class Screen {
     EDIT_CONTACT,
     LEAD_FILTER,
     DEAL_FILTER,
-    CONTACT_FILTER
+    CONTACT_FILTER,
+    ACTIVITY
 }
 
 @Composable
 @Preview
 fun App() {
-    var currentScreen by remember { mutableStateOf(Screen.CONTACT_LIST) }
+    var currentScreen by remember { mutableStateOf(Screen.ACTIVITY) }
     var showFilterDialog by remember { mutableStateOf(false) }
     var selectedLeadId by remember { mutableStateOf<String?>(null) }
     var selectedDealId by remember { mutableStateOf<String?>(null) }
@@ -64,6 +67,7 @@ fun App() {
     val editOrgViewModel = remember { EditOrgViewModel() }
     val contactDetailViewModel = remember { ContactDetailViewModel() }
     val orgDetailViewModel = remember { OrgDetailViewModel() }
+    val activityViewModel = remember { ActivityViewModel() }
 
     val activeDealFilters by dealViewModel.activeFilterCount.collectAsState()
     val activeContactFilters by contactViewModel.activeFilterCount.collectAsState()
@@ -95,6 +99,7 @@ fun App() {
                             Screen.EDIT_DEAL     -> "Edit Deal"
                             Screen.EDIT_CONTACT  -> "Edit Contact"
                             Screen.EDIT_ORG      -> "Edit Organization"
+                            Screen.ACTIVITY      -> "Activity"
                             else -> "CRM"
                         },
                         isSubScreen = currentScreen == Screen.CREATE_LEAD   ||
@@ -143,7 +148,8 @@ fun App() {
                 if (currentScreen == Screen.LEAD_LIST || 
                     currentScreen == Screen.DEAL_LIST || 
                     currentScreen == Screen.CONTACT_LIST ||
-                    currentScreen == Screen.ORG_LIST) {
+                    currentScreen == Screen.ORG_LIST ||
+                    currentScreen == Screen.ACTIVITY) {
                     NavigationBar(
                         containerColor = Color.White,
                         tonalElevation = 8.dp
@@ -167,6 +173,13 @@ fun App() {
                             onClick = { currentScreen = Screen.CONTACT_LIST },
                             icon = { Icon(Icons.Default.Groups, "Contacts") },
                             label = { Text("Contacts") },
+                            colors = NavigationBarItemDefaults.colors(selectedIconColor = Color(0xFF6E40FF), selectedTextColor = Color(0xFF6E40FF))
+                        )
+                        NavigationBarItem(
+                            selected = currentScreen == Screen.ACTIVITY,
+                            onClick = { currentScreen = Screen.ACTIVITY },
+                            icon = { Icon(Icons.Default.CalendarToday, "Activity") },
+                            label = { Text("Activity") },
                             colors = NavigationBarItemDefaults.colors(selectedIconColor = Color(0xFF6E40FF), selectedTextColor = Color(0xFF6E40FF))
                         )
                         NavigationBarItem(
@@ -368,6 +381,12 @@ fun App() {
                             onNavigateBack = { currentScreen = Screen.ORG_LIST }
                         )
                     }
+                }
+                Screen.ACTIVITY -> {
+                    ActivityScreen(
+                        viewModel = activityViewModel,
+                        modifier = Modifier.padding(innerPadding)
+                    )
                 }
             }
         }
