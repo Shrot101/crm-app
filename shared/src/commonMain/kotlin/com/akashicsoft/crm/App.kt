@@ -12,9 +12,11 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 import androidx.compose.ui.tooling.preview.Preview
 import com.akashicsoft.crm.ui.*
 import com.akashicsoft.crm.activity.ui.ActivityScreen
+import com.akashicsoft.crm.activity.ui.CreateActivityScreen
 import com.akashicsoft.crm.ui.components.CrmTopAppBar
 import com.akashicsoft.crm.viewModel.*
 import com.akashicsoft.crm.activity.viewmodel.ActivityViewModel
+import com.akashicsoft.crm.activity.viewmodel.CreateActivityViewModel
 
 /**
  * Available Screens in the App
@@ -38,7 +40,8 @@ enum class Screen {
     LEAD_FILTER,
     DEAL_FILTER,
     CONTACT_FILTER,
-    ACTIVITY
+    ACTIVITY,
+    CREATE_ACTIVITY
 }
 
 @Composable
@@ -68,6 +71,7 @@ fun App() {
     val contactDetailViewModel = remember { ContactDetailViewModel() }
     val orgDetailViewModel = remember { OrgDetailViewModel() }
     val activityViewModel = remember { ActivityViewModel() }
+    val createActivityViewModel = remember { CreateActivityViewModel() }
 
     val activeDealFilters by dealViewModel.activeFilterCount.collectAsState()
     val activeContactFilters by contactViewModel.activeFilterCount.collectAsState()
@@ -100,6 +104,7 @@ fun App() {
                             Screen.EDIT_CONTACT  -> "Edit Contact"
                             Screen.EDIT_ORG      -> "Edit Organization"
                             Screen.ACTIVITY      -> "Activity"
+                            Screen.CREATE_ACTIVITY -> "Create Activity"
                             else -> "CRM"
                         },
                         isSubScreen = currentScreen == Screen.CREATE_LEAD   ||
@@ -109,7 +114,8 @@ fun App() {
                                      currentScreen == Screen.CREATE_CONTACT ||
                                      currentScreen == Screen.CREATE_ORG     ||
                                      currentScreen == Screen.EDIT_CONTACT   ||
-                                     currentScreen == Screen.EDIT_ORG,
+                                     currentScreen == Screen.EDIT_ORG       ||
+                                     currentScreen == Screen.CREATE_ACTIVITY,
                         hasActiveFilters = when(currentScreen) {
                             Screen.DEAL_LIST -> activeDealFilters > 0
                             Screen.CONTACT_LIST -> activeContactFilters > 0
@@ -127,6 +133,7 @@ fun App() {
                                 Screen.EDIT_DEAL      -> currentScreen = Screen.DEAL_LIST
                                 Screen.CREATE_CONTACT -> currentScreen = Screen.CONTACT_LIST
                                 Screen.CREATE_ORG     -> currentScreen = Screen.ORG_LIST
+                                Screen.CREATE_ACTIVITY -> currentScreen = Screen.ACTIVITY
                                 else -> currentScreen = if (currentScreen == Screen.LEAD_LIST)
                                     Screen.DEAL_LIST else Screen.LEAD_LIST
                             }
@@ -385,7 +392,18 @@ fun App() {
                 Screen.ACTIVITY -> {
                     ActivityScreen(
                         viewModel = activityViewModel,
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(innerPadding),
+                        onCreateActivity = {
+                            createActivityViewModel.resetForm()
+                            currentScreen = Screen.CREATE_ACTIVITY
+                        }
+                    )
+                }
+                Screen.CREATE_ACTIVITY -> {
+                    CreateActivityScreen(
+                        viewModel = createActivityViewModel,
+                        modifier = Modifier.padding(innerPadding),
+                        onNavigateBack = { currentScreen = Screen.ACTIVITY }
                     )
                 }
             }

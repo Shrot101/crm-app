@@ -2,27 +2,36 @@ package com.akashicsoft.crm.activity.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.akashicsoft.crm.activity.model.Activity
+import com.akashicsoft.crm.activity.data.FakeActivityData
 import com.akashicsoft.crm.activity.model.ActivityType
 import com.akashicsoft.crm.activity.model.CalendarUiState
 import com.akashicsoft.crm.activity.util.CalendarUtils
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.datetime.LocalDate
+import kotlin.random.Random
 
 class ActivityViewModel : ViewModel() {
 
-    private val _uiState = MutableStateFlow(
-        buildCalendarUiState(CalendarUtils.today())
-    )
-    val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
+    private val _selectedDate = MutableStateFlow(CalendarUtils.today())
 
-    val showTodayButton: StateFlow<Boolean> = _uiState.map { state ->
-        state.selectedDate != CalendarUtils.today()
+    val uiState: StateFlow<CalendarUiState> = combine(
+        _selectedDate,
+        FakeActivityData.activities
+    ) { date, allActivities ->
+        CalendarUiState(
+            selectedDate = date,
+            visibleWeek = CalendarUtils.getWeek(date),
+            monthTitle = CalendarUtils.monthTitle(date),
+            activities = allActivities.filter { it.date == date }
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = buildCalendarUiState(CalendarUtils.today())
+    )
+
+    val showTodayButton: StateFlow<Boolean> = _selectedDate.map { date ->
+        date != CalendarUtils.today()
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -34,57 +43,51 @@ class ActivityViewModel : ViewModel() {
             selectedDate = selectedDate,
             visibleWeek = CalendarUtils.getWeek(selectedDate),
             monthTitle = CalendarUtils.monthTitle(selectedDate),
-            activities = getMockActivities(selectedDate)
+            activities = FakeActivityData.getMockActivities(selectedDate, CalendarUtils.today())
         )
     }
 
-    private fun getMockActivities(date: LocalDate): List<Activity> {
-        return if (date == CalendarUtils.today()) {
-            listOf(
-                Activity(
-                    id = "1",
-                    title = "Demo call",
-                    description = "Initial product demonstration",
-                    time = "10:00 AM",
-                    duration = "30m",
-                    organization = "Nova Retail Corp.",
-                    type = ActivityType.CALL,
-                    date = date
-                ),
-                Activity(
-                    id = "2",
-                    title = "Send proposal",
-                    description = "Follow-up with quarterly proposal",
-                    time = "12:30 PM",
-                    duration = "Task",
-                    organization = "Skyline Enterprises",
-                    type = ActivityType.TASK,
-                    date = date
-                ),
-                Activity(
-                    id = "3",
-                    title = "Lunch meeting",
-                    description = "Discuss potential partnership",
-                    time = "01:30 PM",
-                    duration = "1h",
-                    organization = "Global Tech Solutions",
-                    type = ActivityType.MEETING,
-                    date = date
-                )
-            )
-        } else {
-            emptyList()
-        }
-    }
-
     fun onDateSelected(date: LocalDate) {
-        _uiState.value = buildCalendarUiState(date)
+        _selectedDate.value = date
     }
 
     fun goToToday() {
         onDateSelected(CalendarUtils.today())
     }
 
+    fun toggleTaskCompletion(activityId: String) {
+        FakeActivityData.toggleTaskCompletion(activityId)
+    }
+
+    fun cloneActivity(activityId: String) {
+        val activityToClone = uiState.value.activities.find { it.id == activityId }
+        if (activityToClone != null) {
+            val clonedActivity = activityToClone.copy(
+                id = "cloned_${activityToClone.id}_${Random.nextInt()}",
+                title = "${activityToClone.title} (Clone)",
+                isCompleted = false
+            )
+            FakeActivityData.addActivity(clonedActivity)
+        }
+    }
+
+    fun deleteActivity(activityId: String) {
+        FakeActivityData.deleteActivity(activityId)
+    }
+
+    fun rescheduleActivity(activityId: String, newDate: LocalDate, newTime: String? = null) {
+        val activity = FakeActivityData.activities.value.find { it.id == activityId }
+        if (activity != null) {
+            val updatedActivity = if (newTime != null) {
+                activity.copy(date = newDate, time = newTime)
+            } else {
+                activity.copy(date = newDate)
+            }
+            FakeActivityData.updateActivity(updatedActivity)
+            onDateSelected(newDate)
+        }
+    }
+    
     fun addActivity(type: ActivityType) {
         // Implementation placeholder for future Milestones
     }
