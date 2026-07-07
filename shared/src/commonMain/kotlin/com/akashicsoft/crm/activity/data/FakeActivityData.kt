@@ -12,7 +12,11 @@ object FakeActivityData {
     val activities: StateFlow<List<Activity>> = _activities.asStateFlow()
 
     fun getMockActivities(date: LocalDate, today: LocalDate): List<Activity> {
-        return _activities.value.filter { it.date == date }
+        return _activities.value.filter { activity ->
+            val startDate = activity.date
+            val endDate = activity.endDate ?: activity.date
+            date in startDate..endDate
+        }
     }
 
     fun addActivity(activity: Activity) {

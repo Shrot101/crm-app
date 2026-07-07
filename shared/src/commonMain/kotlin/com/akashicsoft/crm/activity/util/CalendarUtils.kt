@@ -55,4 +55,23 @@ object CalendarUtils {
         val day = date.day
         return "$dayName, $monthName $day"
     }
+
+    fun parseTimeToMinutes(time: String): Int {
+        if (time.equals("All Day", ignoreCase = true)) return -1 // Earliest possible
+
+        val parts = time.split(" ")
+        if (parts.size < 2) return 0 // Fallback
+
+        val timeParts = parts[0].split(":")
+        if (timeParts.size < 2) return 0 // Fallback
+
+        var hours = timeParts[0].toIntOrNull() ?: 0
+        val minutes = timeParts[1].toIntOrNull() ?: 0
+        val amPm = parts[1].uppercase()
+
+        if (amPm == "PM" && hours < 12) hours += 12
+        if (amPm == "AM" && hours == 12) hours = 0
+
+        return hours * 60 + minutes
+    }
 }

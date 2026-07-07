@@ -18,11 +18,24 @@ class ActivityViewModel : ViewModel() {
         _selectedDate,
         FakeActivityData.activities
     ) { date, allActivities ->
+        val filteredActivities = allActivities.filter { activity ->
+            val startDate = activity.date
+            val endDate = activity.endDate ?: activity.date
+            date in startDate..endDate
+        }.sortedWith(compareBy({ activity ->
+            // 1. Ongoing multi-day activities (started before today) go to top
+            val isOngoing = activity.date < date
+            if (isOngoing) -2 else 0
+        }, { activity ->
+            // 2. All Day / Timed activities
+            CalendarUtils.parseTimeToMinutes(activity.time)
+        }))
+
         CalendarUiState(
             selectedDate = date,
             visibleWeek = CalendarUtils.getWeek(date),
             monthTitle = CalendarUtils.monthTitle(date),
-            activities = allActivities.filter { it.date == date }
+            activities = filteredActivities
         )
     }.stateIn(
         scope = viewModelScope,
