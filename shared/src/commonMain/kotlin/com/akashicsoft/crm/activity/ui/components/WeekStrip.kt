@@ -7,9 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.akashicsoft.crm.activity.util.CalendarUtils
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.plus
+   import kotlinx.datetime.*
 
 @Composable
 fun WeekStrip(
@@ -23,15 +21,22 @@ fun WeekStrip(
     val initialPage = 5000
     
     // The anchor date for the middle of the pager (index 5000)
-    val anchorDate = remember { selectedDate }
+    // We use the start of the week for stable calculations
+    val anchorWeekStart = remember { 
+        val daysFromMonday = selectedDate.dayOfWeek.isoDayNumber - 1
+        selectedDate.minus(daysFromMonday, DateTimeUnit.DAY)
+    }
     
     val pagerState = rememberPagerState(initialPage = initialPage) { pageCount }
     
-    // Sync pager when selectedDate changes from outside (e.g., Today button)
+    // Sync pager when selectedDate changes from outside (e.g., Today button, arrows)
     LaunchedEffect(selectedDate) {
-        val daysDiff = selectedDate.toEpochDays() - anchorDate.toEpochDays()
+        val daysFromMonday = selectedDate.dayOfWeek.isoDayNumber - 1
+        val selectedWeekStart = selectedDate.minus(daysFromMonday, DateTimeUnit.DAY)
+        
+        val daysDiff = selectedWeekStart.toEpochDays() - anchorWeekStart.toEpochDays()
         val weeksDiff = (daysDiff / 7).toInt()
-        val targetPage = (initialPage + weeksDiff).toInt()
+        val targetPage = initialPage + weeksDiff
         
         if (pagerState.currentPage != targetPage) {
             pagerState.animateScrollToPage(targetPage)
@@ -41,13 +46,13 @@ fun WeekStrip(
     // Trigger onWeekSwiped when page changes
     LaunchedEffect(pagerState.currentPage) {
         val weeksDiff = pagerState.currentPage - initialPage
-        val targetDate = anchorDate.plus(weeksDiff * 7L, DateTimeUnit.DAY)
+        val targetDate = anchorWeekStart.plus(weeksDiff * 7L, DateTimeUnit.DAY)
         
         // Check if swiped to a different week
-        val currentWeek = CalendarUtils.getWeek(selectedDate)
-        val targetWeek = CalendarUtils.getWeek(targetDate)
+        val daysFromMonday = selectedDate.dayOfWeek.isoDayNumber - 1
+        val currentWeekStart = selectedDate.minus(daysFromMonday, DateTimeUnit.DAY)
         
-        if (currentWeek != targetWeek) {
+        if (currentWeekStart != targetDate) {
             onWeekSwiped(targetDate)
         }
     }
@@ -59,7 +64,7 @@ fun WeekStrip(
         beyondViewportPageCount = 1 
     ) { page ->
         val weeksDiff = page - initialPage
-        val weekBaseDate = anchorDate.plus(weeksDiff * 7L, DateTimeUnit.DAY)
+        val weekBaseDate = anchorWeekStart.plus(weeksDiff * 7L, DateTimeUnit.DAY)
         val week = CalendarUtils.getWeek(weekBaseDate)
 
         Row(

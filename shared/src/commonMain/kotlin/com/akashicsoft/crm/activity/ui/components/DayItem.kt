@@ -22,7 +22,7 @@ import kotlinx.datetime.LocalDate
 private val PrimaryPurple = Color(0xFF6E40FF)
 private val SelectedDayBg = Color(0xFF3B229D) // Darker purple from image
 private val IndicatorGray = Color(0xFFBDBDBD)
-private val WeekendGray = Color(0xFFBDBDBD)
+private val WeekendColor = Color.Black
 
 @Composable
 fun DayItem(
@@ -50,14 +50,14 @@ fun DayItem(
             text = dayName,
             fontSize = 10.sp,
             fontWeight = FontWeight.Medium,
-            color = if (isSelected) Color.White else if (isWeekend) WeekendGray else Color.Gray
+            color = if (isSelected) Color.White else if (isWeekend) WeekendColor else Color.Gray
         )
 
         Text(
             text = dayNumber,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            color = if (isSelected) Color.White else if (isWeekend) WeekendGray else Color.Black
+            color = if (isSelected) Color.White else if (isWeekend) WeekendColor else Color.Black
         )
 
         // Activity indicator dot

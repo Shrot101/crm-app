@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,10 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -109,11 +108,11 @@ fun CalendarCard(
                     )
                 }
 
-                // Today button with AnimatedVisibility inside the Box to preserve space
-                // Using Alignment.CenterEnd to keep it pinned to the right
+                // Today button and navigation arrows
                 Row(
                     modifier = Modifier.align(Alignment.CenterEnd),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     AnimatedVisibility(visible = showTodayButton) {
                         TextButton(
@@ -127,6 +126,38 @@ fun CalendarCard(
                                 fontSize = 14.sp
                             )
                         }
+                    }
+
+                    // Left Arrow
+                    IconButton(
+                        onClick = {
+                            val targetDate = selectedDate.minus(7, DateTimeUnit.DAY)
+                            onDateSelected(targetDate)
+                        },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Previous Week",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    // Right Arrow
+                    IconButton(
+                        onClick = {
+                            val targetDate = selectedDate.plus(7, DateTimeUnit.DAY)
+                            onDateSelected(targetDate)
+                        },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = "Next Week",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                 }
             }

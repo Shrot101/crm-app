@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.LocalDate
-import com.akashicsoft.crm.activity.util.CalendarUtils
 
 object FakeActivityData {
     private val _activities = MutableStateFlow<List<Activity>>(getInitialMockActivities())
@@ -41,7 +40,6 @@ object FakeActivityData {
     }
 
     private fun getInitialMockActivities(): List<Activity> {
-        val today = CalendarUtils.today()
         return listOf(
             Activity(
                 id = "1",
@@ -51,9 +49,21 @@ object FakeActivityData {
                 duration = "30m",
                 organization = "Nova Retail Corp.",
                 type = ActivityType.CALL,
-                date = today,
+                date = LocalDate(2026, 7, 7),
                 source = ActivitySource.PHONE,
                 priority = ActivityPriority.NORMAL
+            ),
+            Activity(
+                id = "2",
+                title = "Contract review",
+                description = "Go through the new terms",
+                time = "02:00 PM",
+                duration = "45m",
+                organization = "Nova Retail Corp.",
+                type = ActivityType.MEETING,
+                date = LocalDate(2026, 7, 7),
+                source = ActivitySource.OTHER,
+                priority = ActivityPriority.URGENT
             ),
             Activity(
                 id = "3",
@@ -63,9 +73,33 @@ object FakeActivityData {
                 duration = "1h",
                 organization = "Global Tech Solutions",
                 type = ActivityType.MEETING,
-                date = today,
+                date = LocalDate(2026, 7, 8),
                 source = ActivitySource.OTHER,
                 priority = ActivityPriority.HIGH
+            ),
+            Activity(
+                id = "4",
+                title = "Follow-up email",
+                description = "Send project proposal",
+                time = "09:00 AM",
+                duration = "15m",
+                organization = "Tech Innovators",
+                type = ActivityType.MESSAGE,
+                date = LocalDate(2026, 7, 9),
+                source = ActivitySource.EMAIL,
+                priority = ActivityPriority.LOW
+            ),
+            Activity(
+                id = "5",
+                title = "Strategy session",
+                description = "Q3 Planning",
+                time = "11:00 AM",
+                duration = "2h",
+                organization = "Enterprise Corp",
+                type = ActivityType.EVENTS,
+                date = LocalDate(2026, 7, 10),
+                source = ActivitySource.OTHER,
+                priority = ActivityPriority.NORMAL
             )
         )
     }
