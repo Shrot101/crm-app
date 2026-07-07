@@ -36,7 +36,8 @@ import kotlinx.datetime.toLocalDateTime
 fun ActivityScreen(
     viewModel: ActivityViewModel,
     modifier: Modifier = Modifier,
-    onCreateActivity: () -> Unit = {}
+    onCreateActivity: () -> Unit = {},
+    onEditActivity: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val showTodayButton by viewModel.showTodayButton.collectAsState()
@@ -123,6 +124,7 @@ fun ActivityScreen(
                             }
                             "delete" -> viewModel.deleteActivity(selectedActivityForActions!!.id)
                             "reschedule" -> showRescheduleDatePicker = true
+                            "edit" -> onEditActivity(selectedActivityForActions!!.id)
                         }
                         showActionSheet = false
                     }

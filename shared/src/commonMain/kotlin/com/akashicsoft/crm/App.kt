@@ -17,6 +17,8 @@ import com.akashicsoft.crm.ui.components.CrmTopAppBar
 import com.akashicsoft.crm.viewModel.*
 import com.akashicsoft.crm.activity.viewmodel.ActivityViewModel
 import com.akashicsoft.crm.activity.viewmodel.CreateActivityViewModel
+import com.akashicsoft.crm.activity.viewmodel.EditActivityViewModel
+import com.akashicsoft.crm.activity.ui.EditActivityScreen
 
 /**
  * Available Screens in the App
@@ -41,7 +43,8 @@ enum class Screen {
     DEAL_FILTER,
     CONTACT_FILTER,
     ACTIVITY,
-    CREATE_ACTIVITY
+    CREATE_ACTIVITY,
+    EDIT_ACTIVITY
 }
 
 @Composable
@@ -53,6 +56,7 @@ fun App() {
     var selectedDealId by remember { mutableStateOf<String?>(null) }
     var selectedContactId by remember { mutableStateOf<String?>(null) }
     var selectedOrgId by remember { mutableStateOf<String?>(null) }
+    var selectedActivityId by remember { mutableStateOf<String?>(null) }
     
     // ViewModels
     val leadViewModel = remember { LeadViewModel() }
@@ -72,6 +76,7 @@ fun App() {
     val orgDetailViewModel = remember { OrgDetailViewModel() }
     val activityViewModel = remember { ActivityViewModel() }
     val createActivityViewModel = remember { CreateActivityViewModel() }
+    val editActivityViewModel = remember { EditActivityViewModel() }
 
     val activeDealFilters by dealViewModel.activeFilterCount.collectAsState()
     val activeContactFilters by contactViewModel.activeFilterCount.collectAsState()
@@ -105,6 +110,7 @@ fun App() {
                             Screen.EDIT_ORG      -> "Edit Organization"
                             Screen.ACTIVITY      -> "Activity"
                             Screen.CREATE_ACTIVITY -> "Create Activity"
+                            Screen.EDIT_ACTIVITY -> "Edit Activity"
                             else -> "CRM"
                         },
                         isSubScreen = currentScreen == Screen.CREATE_LEAD   ||
@@ -115,7 +121,8 @@ fun App() {
                                      currentScreen == Screen.CREATE_ORG     ||
                                      currentScreen == Screen.EDIT_CONTACT   ||
                                      currentScreen == Screen.EDIT_ORG       ||
-                                     currentScreen == Screen.CREATE_ACTIVITY,
+                                     currentScreen == Screen.CREATE_ACTIVITY ||
+                                     currentScreen == Screen.EDIT_ACTIVITY,
                         hasActiveFilters = when(currentScreen) {
                             Screen.DEAL_LIST -> activeDealFilters > 0
                             Screen.CONTACT_LIST -> activeContactFilters > 0
@@ -134,6 +141,7 @@ fun App() {
                                 Screen.CREATE_CONTACT -> currentScreen = Screen.CONTACT_LIST
                                 Screen.CREATE_ORG     -> currentScreen = Screen.ORG_LIST
                                 Screen.CREATE_ACTIVITY -> currentScreen = Screen.ACTIVITY
+                                Screen.EDIT_ACTIVITY -> currentScreen = Screen.ACTIVITY
                                 else -> currentScreen = if (currentScreen == Screen.LEAD_LIST)
                                     Screen.DEAL_LIST else Screen.LEAD_LIST
                             }
@@ -396,6 +404,10 @@ fun App() {
                         onCreateActivity = {
                             createActivityViewModel.resetForm()
                             currentScreen = Screen.CREATE_ACTIVITY
+                        },
+                        onEditActivity = { activityId ->
+                            selectedActivityId = activityId
+                            currentScreen = Screen.EDIT_ACTIVITY
                         }
                     )
                 }
@@ -405,6 +417,16 @@ fun App() {
                         modifier = Modifier.padding(innerPadding),
                         onNavigateBack = { currentScreen = Screen.ACTIVITY }
                     )
+                }
+                Screen.EDIT_ACTIVITY -> {
+                    selectedActivityId?.let { id ->
+                        EditActivityScreen(
+                            viewModel = editActivityViewModel,
+                            activityId = id,
+                            modifier = Modifier.padding(innerPadding),
+                            onNavigateBack = { currentScreen = Screen.ACTIVITY }
+                        )
+                    }
                 }
             }
         }
