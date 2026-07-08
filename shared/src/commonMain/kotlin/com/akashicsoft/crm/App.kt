@@ -402,7 +402,7 @@ fun App() {
                         viewModel = activityViewModel,
                         modifier = Modifier.padding(innerPadding),
                         onCreateActivity = {
-                            createActivityViewModel.resetForm()
+                            createActivityViewModel.resetForm(activityViewModel.uiState.value.selectedDate)
                             currentScreen = Screen.CREATE_ACTIVITY
                         },
                         onEditActivity = { activityId ->

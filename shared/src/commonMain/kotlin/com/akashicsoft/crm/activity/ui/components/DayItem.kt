@@ -65,7 +65,11 @@ fun DayItem(
             modifier = Modifier
                 .size(4.dp)
                 .clip(CircleShape)
-                .background(if (isSelected) Color.White else IndicatorGray)
+                .background(if (hasActivity) {
+                    if (isSelected) Color.White else IndicatorGray
+                } else {
+                    Color.Transparent
+                })
         )
     }
 }

@@ -77,11 +77,12 @@ class CreateActivityViewModel : ViewModel() {
         assignedTo.value = availableOwners.firstOrNull()
     }
 
-    fun resetForm() {
+    fun resetForm(initialDate: LocalDate? = null) {
+        val baseDate = initialDate ?: CalendarUtils.today()
         title.value = ""
-        startDate.value = CalendarUtils.today()
+        startDate.value = baseDate
         startTime.value = "10:00 AM"
-        endDate.value = CalendarUtils.today()
+        endDate.value = baseDate
         endTime.value = "11:00 AM"
         isAllDay.value = false
         activityType.value = ActivityType.CALL

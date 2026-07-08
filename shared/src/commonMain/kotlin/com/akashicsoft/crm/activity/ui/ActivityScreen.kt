@@ -41,6 +41,7 @@ fun ActivityScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val showTodayButton by viewModel.showTodayButton.collectAsState()
+    val datesWithActivities by viewModel.datesWithActivities.collectAsState()
     
     // Action Sheet State
     val sheetState = rememberModalBottomSheetState()
@@ -67,6 +68,7 @@ fun ActivityScreen(
                 monthTitle = uiState.monthTitle,
                 selectedDate = uiState.selectedDate,
                 showTodayButton = showTodayButton,
+                datesWithActivities = datesWithActivities,
                 onTodayClick = viewModel::goToToday,
                 onDateSelected = viewModel::onDateSelected,
                 onWeekSwiped = viewModel::onDateSelected

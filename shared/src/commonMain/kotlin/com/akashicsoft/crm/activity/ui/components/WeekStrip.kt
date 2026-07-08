@@ -12,6 +12,7 @@ import com.akashicsoft.crm.activity.util.CalendarUtils
 @Composable
 fun WeekStrip(
     selectedDate: LocalDate,
+    datesWithActivities: Set<LocalDate>,
     onDateSelected: (LocalDate) -> Unit,
     onWeekSwiped: (LocalDate) -> Unit,
     modifier: Modifier = Modifier
@@ -77,7 +78,7 @@ fun WeekStrip(
                     date = date,
                     isSelected = date == selectedDate,
                     isToday = CalendarUtils.isToday(date),
-                    hasActivity = false,
+                    hasActivity = date in datesWithActivities,
                     onClick = { onDateSelected(date) }
                 )
             }

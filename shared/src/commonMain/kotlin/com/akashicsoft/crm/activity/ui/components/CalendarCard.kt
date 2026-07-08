@@ -25,6 +25,7 @@ fun CalendarCard(
     monthTitle: String,
     selectedDate: LocalDate,
     showTodayButton: Boolean,
+    datesWithActivities: Set<LocalDate>,
     onTodayClick: () -> Unit,
     onDateSelected: (LocalDate) -> Unit,
     onWeekSwiped: (LocalDate) -> Unit,
@@ -167,6 +168,7 @@ fun CalendarCard(
             // Week Strip
             WeekStrip(
                 selectedDate = selectedDate,
+                datesWithActivities = datesWithActivities,
                 onDateSelected = onDateSelected,
                 onWeekSwiped = onWeekSwiped
             )

@@ -7,7 +7,7 @@ import com.akashicsoft.crm.activity.model.ActivityType
 import com.akashicsoft.crm.activity.model.CalendarUiState
 import com.akashicsoft.crm.activity.util.CalendarUtils
 import kotlinx.coroutines.flow.*
-import kotlinx.datetime.LocalDate
+import kotlinx.datetime.*
 import kotlin.random.Random
 
 class ActivityViewModel : ViewModel() {
@@ -50,6 +50,25 @@ class ActivityViewModel : ViewModel() {
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = false
     )
+
+    val datesWithActivities: StateFlow<Set<LocalDate>> = FakeActivityData.activities.map { activities ->
+        val dateSet = mutableSetOf<LocalDate>()
+        activities.forEach { activity ->
+            val start = activity.date
+            val end = activity.endDate ?: activity.date
+            
+            var current = start
+            while (current <= end) {
+                dateSet.add(current)
+                current = current.plus(1, DateTimeUnit.DAY)
+            }
+        }
+        dateSet
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptySet()
+    )
     
     private fun buildCalendarUiState(selectedDate: LocalDate): CalendarUiState {
         return CalendarUiState(
@@ -91,10 +110,16 @@ class ActivityViewModel : ViewModel() {
     fun rescheduleActivity(activityId: String, newDate: LocalDate, newTime: String? = null) {
         val activity = FakeActivityData.activities.value.find { it.id == activityId }
         if (activity != null) {
+            val oldStartDate = activity.date
+            val oldEndDate = activity.endDate ?: activity.date
+            val dayDuration = oldEndDate.toEpochDays() - oldStartDate.toEpochDays()
+            
+            val updatedEndDate = newDate.plus(dayDuration.toInt(), DateTimeUnit.DAY)
+
             val updatedActivity = if (newTime != null) {
-                activity.copy(date = newDate, time = newTime)
+                activity.copy(date = newDate, endDate = updatedEndDate, time = newTime)
             } else {
-                activity.copy(date = newDate)
+                activity.copy(date = newDate, endDate = updatedEndDate)
             }
             FakeActivityData.updateActivity(updatedActivity)
             onDateSelected(newDate)
