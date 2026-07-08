@@ -26,6 +26,7 @@ fun ActivityTimelineItem(
     isFirst: Boolean,
     isLast: Boolean,
     onMenuClick: () -> Unit,
+    onItemClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val (icon, color) = when (activity.type) {
@@ -85,6 +86,7 @@ fun ActivityTimelineItem(
             modifier = Modifier
                 .weight(1f)
                 .padding(bottom = 16.dp),
+            onClick = onItemClick,
             colors = CardDefaults.cardColors(containerColor = Color.White),
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)

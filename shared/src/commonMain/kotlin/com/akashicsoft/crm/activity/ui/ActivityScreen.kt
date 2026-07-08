@@ -37,7 +37,8 @@ fun ActivityScreen(
     viewModel: ActivityViewModel,
     modifier: Modifier = Modifier,
     onCreateActivity: () -> Unit = {},
-    onEditActivity: (String) -> Unit = {}
+    onEditActivity: (String) -> Unit = {},
+    onActivityClick: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val showTodayButton by viewModel.showTodayButton.collectAsState()
@@ -97,6 +98,9 @@ fun ActivityScreen(
                                 onMenuClick = {
                                     selectedActivityForActions = activity
                                     showActionSheet = true
+                                },
+                                onItemClick = {
+                                    onActivityClick(activity.id)
                                 }
                             )
                         }

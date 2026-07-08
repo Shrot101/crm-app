@@ -19,6 +19,8 @@ import com.akashicsoft.crm.activity.viewmodel.ActivityViewModel
 import com.akashicsoft.crm.activity.viewmodel.CreateActivityViewModel
 import com.akashicsoft.crm.activity.viewmodel.EditActivityViewModel
 import com.akashicsoft.crm.activity.ui.EditActivityScreen
+import com.akashicsoft.crm.activity.viewmodel.DetailActivityViewModel
+import com.akashicsoft.crm.activity.ui.DetailActivityScreen
 
 /**
  * Available Screens in the App
@@ -44,7 +46,8 @@ enum class Screen {
     CONTACT_FILTER,
     ACTIVITY,
     CREATE_ACTIVITY,
-    EDIT_ACTIVITY
+    EDIT_ACTIVITY,
+    ACTIVITY_DETAILS
 }
 
 @Composable
@@ -77,6 +80,7 @@ fun App() {
     val activityViewModel = remember { ActivityViewModel() }
     val createActivityViewModel = remember { CreateActivityViewModel() }
     val editActivityViewModel = remember { EditActivityViewModel() }
+    val detailActivityViewModel = remember { DetailActivityViewModel() }
 
     val activeDealFilters by dealViewModel.activeFilterCount.collectAsState()
     val activeContactFilters by contactViewModel.activeFilterCount.collectAsState()
@@ -111,6 +115,7 @@ fun App() {
                             Screen.ACTIVITY      -> "Activity"
                             Screen.CREATE_ACTIVITY -> "Create Activity"
                             Screen.EDIT_ACTIVITY -> "Edit Activity"
+                            Screen.ACTIVITY_DETAILS -> "Activity Details"
                             else -> "CRM"
                         },
                         isSubScreen = currentScreen == Screen.CREATE_LEAD   ||
@@ -122,7 +127,8 @@ fun App() {
                                      currentScreen == Screen.EDIT_CONTACT   ||
                                      currentScreen == Screen.EDIT_ORG       ||
                                      currentScreen == Screen.CREATE_ACTIVITY ||
-                                     currentScreen == Screen.EDIT_ACTIVITY,
+                                     currentScreen == Screen.EDIT_ACTIVITY ||
+                                     currentScreen == Screen.ACTIVITY_DETAILS,
                         hasActiveFilters = when(currentScreen) {
                             Screen.DEAL_LIST -> activeDealFilters > 0
                             Screen.CONTACT_LIST -> activeContactFilters > 0
@@ -142,6 +148,7 @@ fun App() {
                                 Screen.CREATE_ORG     -> currentScreen = Screen.ORG_LIST
                                 Screen.CREATE_ACTIVITY -> currentScreen = Screen.ACTIVITY
                                 Screen.EDIT_ACTIVITY -> currentScreen = Screen.ACTIVITY
+                                Screen.ACTIVITY_DETAILS -> currentScreen = Screen.ACTIVITY
                                 else -> currentScreen = if (currentScreen == Screen.LEAD_LIST)
                                     Screen.DEAL_LIST else Screen.LEAD_LIST
                             }
@@ -408,6 +415,10 @@ fun App() {
                         onEditActivity = { activityId ->
                             selectedActivityId = activityId
                             currentScreen = Screen.EDIT_ACTIVITY
+                        },
+                        onActivityClick = { activityId ->
+                            selectedActivityId = activityId
+                            currentScreen = Screen.ACTIVITY_DETAILS
                         }
                     )
                 }
@@ -425,6 +436,19 @@ fun App() {
                             activityId = id,
                             modifier = Modifier.padding(innerPadding),
                             onNavigateBack = { currentScreen = Screen.ACTIVITY }
+                        )
+                    }
+                }
+                Screen.ACTIVITY_DETAILS -> {
+                    selectedActivityId?.let { id ->
+                        DetailActivityScreen(
+                            viewModel = detailActivityViewModel,
+                            activityId = id,
+                            onNavigateBack = { currentScreen = Screen.ACTIVITY },
+                            onEditActivity = { activityId ->
+                                selectedActivityId = activityId
+                                currentScreen = Screen.EDIT_ACTIVITY
+                            }
                         )
                     }
                 }
