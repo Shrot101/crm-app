@@ -15,6 +15,8 @@ import com.akashicsoft.crm.activity.ui.ActivityScreen
 import com.akashicsoft.crm.activity.ui.CreateActivityScreen
 import com.akashicsoft.crm.ui.components.CrmTopAppBar
 import com.akashicsoft.crm.viewModel.*
+import com.akashicsoft.crm.activity.ui.ActivityFilterScreen
+import com.akashicsoft.crm.activity.viewmodel.ActivityFilterViewModel
 import com.akashicsoft.crm.activity.viewmodel.ActivityViewModel
 import com.akashicsoft.crm.activity.viewmodel.CreateActivityViewModel
 import com.akashicsoft.crm.activity.viewmodel.EditActivityViewModel
@@ -47,7 +49,8 @@ enum class Screen {
     ACTIVITY,
     CREATE_ACTIVITY,
     EDIT_ACTIVITY,
-    ACTIVITY_DETAILS
+    ACTIVITY_DETAILS,
+    ACTIVITY_FILTER
 }
 
 @Composable
@@ -81,9 +84,16 @@ fun App() {
     val createActivityViewModel = remember { CreateActivityViewModel() }
     val editActivityViewModel = remember { EditActivityViewModel() }
     val detailActivityViewModel = remember { DetailActivityViewModel() }
+    val activityFilterViewModel = remember { ActivityFilterViewModel() }
 
     val activeDealFilters by dealViewModel.activeFilterCount.collectAsState()
     val activeContactFilters by contactViewModel.activeFilterCount.collectAsState()
+    val activeActivityFilters by activityFilterViewModel.activeFilterCount.collectAsState()
+    val activityFilters by activityFilterViewModel.currentFilter.collectAsState()
+
+    LaunchedEffect(activityFilters) {
+        activityViewModel.setFilter(activityFilters)
+    }
 
     MaterialTheme {
         Scaffold(
@@ -92,6 +102,7 @@ fun App() {
                 if (currentScreen != Screen.LEAD_FILTER && 
                     currentScreen != Screen.DEAL_FILTER && 
                     currentScreen != Screen.CONTACT_FILTER && 
+                    currentScreen != Screen.ACTIVITY_FILTER &&
                     currentScreen != Screen.LEAD_DETAILS &&
                     currentScreen != Screen.CONTACT_DETAILS &&
                     currentScreen != Screen.ORG_DETAILS &&
@@ -132,10 +143,12 @@ fun App() {
                         hasActiveFilters = when(currentScreen) {
                             Screen.DEAL_LIST -> activeDealFilters > 0
                             Screen.CONTACT_LIST -> activeContactFilters > 0
+                            Screen.ACTIVITY -> activeActivityFilters > 0
                             else -> false
                         },
                         filterBadgeColor = when(currentScreen) {
                             Screen.CONTACT_LIST -> Color(0xFFFF9800) // Orange point for contacts
+                            Screen.ACTIVITY -> Color(0xFFFF9800) // Orange point for activities
                             else -> Color.Red
                         },
                         onMenuClick = {
@@ -157,6 +170,7 @@ fun App() {
                             if (currentScreen == Screen.LEAD_LIST) currentScreen = Screen.LEAD_FILTER
                             if (currentScreen == Screen.DEAL_LIST) currentScreen = Screen.DEAL_FILTER
                             if (currentScreen == Screen.CONTACT_LIST) currentScreen = Screen.CONTACT_FILTER
+                            if (currentScreen == Screen.ACTIVITY) currentScreen = Screen.ACTIVITY_FILTER
                         },
                         onRefreshClick = {
                             if (currentScreen == Screen.LEAD_LIST) leadViewModel.loadLeads()
@@ -451,6 +465,12 @@ fun App() {
                             }
                         )
                     }
+                }
+                Screen.ACTIVITY_FILTER -> {
+                    ActivityFilterScreen(
+                        viewModel = activityFilterViewModel,
+                        onNavigateBack = { currentScreen = Screen.ACTIVITY }
+                    )
                 }
             }
         }
