@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -94,6 +95,7 @@ fun OrgScreen(
 private fun OrgHeader(
     viewModel: OrgViewModel
 ) {
+    val activeFilterCount by viewModel.activeFilterCount.collectAsState()
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -110,7 +112,7 @@ private fun OrgHeader(
             verticalAlignment = Alignment.CenterVertically
         ) {
             val (currentPage, totalPages, totalCount) = viewModel.getCurrentPageInfo()
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Total: $totalCount organizations",
                     style = MaterialTheme.typography.titleMedium,

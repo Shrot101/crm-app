@@ -50,7 +50,8 @@ enum class Screen {
     CREATE_ACTIVITY,
     EDIT_ACTIVITY,
     ACTIVITY_DETAILS,
-    ACTIVITY_FILTER
+    ACTIVITY_FILTER,
+    ORG_FILTER
 }
 
 @Composable
@@ -85,14 +86,21 @@ fun App() {
     val editActivityViewModel = remember { EditActivityViewModel() }
     val detailActivityViewModel = remember { DetailActivityViewModel() }
     val activityFilterViewModel = remember { ActivityFilterViewModel() }
+    val orgFilterViewModel = remember { OrgFilterViewModel() }
 
     val activeDealFilters by dealViewModel.activeFilterCount.collectAsState()
     val activeContactFilters by contactViewModel.activeFilterCount.collectAsState()
     val activeActivityFilters by activityFilterViewModel.activeFilterCount.collectAsState()
+    val activeOrgFilters by orgFilterViewModel.activeFilterCount.collectAsState()
     val activityFilters by activityFilterViewModel.currentFilter.collectAsState()
+    val orgFilters by orgFilterViewModel.currentFilter.collectAsState()
 
     LaunchedEffect(activityFilters) {
         activityViewModel.setFilter(activityFilters)
+    }
+
+    LaunchedEffect(orgFilters) {
+        orgViewModel.updateFilter(orgFilters)
     }
 
     MaterialTheme {
@@ -103,6 +111,7 @@ fun App() {
                     currentScreen != Screen.DEAL_FILTER && 
                     currentScreen != Screen.CONTACT_FILTER && 
                     currentScreen != Screen.ACTIVITY_FILTER &&
+                    currentScreen != Screen.ORG_FILTER &&
                     currentScreen != Screen.LEAD_DETAILS &&
                     currentScreen != Screen.CONTACT_DETAILS &&
                     currentScreen != Screen.ORG_DETAILS &&
@@ -144,11 +153,13 @@ fun App() {
                             Screen.DEAL_LIST -> activeDealFilters > 0
                             Screen.CONTACT_LIST -> activeContactFilters > 0
                             Screen.ACTIVITY -> activeActivityFilters > 0
+                            Screen.ORG_LIST -> activeOrgFilters > 0
                             else -> false
                         },
                         filterBadgeColor = when(currentScreen) {
                             Screen.CONTACT_LIST -> Color(0xFFFF9800) // Orange point for contacts
                             Screen.ACTIVITY -> Color(0xFFFF9800) // Orange point for activities
+                            Screen.ORG_LIST -> Color(0xFFFF9800) // Orange point for orgs
                             else -> Color.Red
                         },
                         onMenuClick = {
@@ -171,6 +182,7 @@ fun App() {
                             if (currentScreen == Screen.DEAL_LIST) currentScreen = Screen.DEAL_FILTER
                             if (currentScreen == Screen.CONTACT_LIST) currentScreen = Screen.CONTACT_FILTER
                             if (currentScreen == Screen.ACTIVITY) currentScreen = Screen.ACTIVITY_FILTER
+                            if (currentScreen == Screen.ORG_LIST) currentScreen = Screen.ORG_FILTER
                         },
                         onRefreshClick = {
                             if (currentScreen == Screen.LEAD_LIST) leadViewModel.loadLeads()
@@ -221,8 +233,8 @@ fun App() {
                         NavigationBarItem(
                             selected = currentScreen == Screen.ORG_LIST,
                             onClick = { currentScreen = Screen.ORG_LIST },
-                            icon = { Icon(Icons.Default.Menu, "More") },
-                            label = { Text("More") },
+                            icon = { Icon(Icons.Default.Business, "Organizations") },
+                            label = { Text("Org") },
                             colors = NavigationBarItemDefaults.colors(selectedIconColor = Color(0xFF6E40FF), selectedTextColor = Color(0xFF6E40FF))
                         )
                     }
@@ -470,6 +482,12 @@ fun App() {
                     ActivityFilterScreen(
                         viewModel = activityFilterViewModel,
                         onNavigateBack = { currentScreen = Screen.ACTIVITY }
+                    )
+                }
+                Screen.ORG_FILTER -> {
+                    OrgFilterScreen(
+                        viewModel = orgFilterViewModel,
+                        onNavigateBack = { currentScreen = Screen.ORG_LIST }
                     )
                 }
             }
